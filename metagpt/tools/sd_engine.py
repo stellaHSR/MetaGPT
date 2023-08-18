@@ -27,7 +27,7 @@ payload = {
     "batch_size": 1,
     "n_iter": 1,
     "steps": 20,
-    "cfg_scale": 11,
+    "cfg_scale": 9,
     "width": 512,
     "height": 768,#768,
     "restore_faces": False,
