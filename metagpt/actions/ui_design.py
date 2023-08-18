@@ -11,8 +11,9 @@ from metagpt.prompts.sd_design import MODEL_SELECTION_PROMPT
 
 class SDPromptRanker(BaseModelAction):
     """
-    根据多个Prompts进行打分和排序，选出最适合当前需求和基础模型的prompt
-    select the best prompt according to the model/requirement
+    Class responsible for ranking multiple prompts based on current requirements and
+    the underlying model to determine the most suitable prompt.
+    
     """
     
     def __init__(self, name: str = "", *args, **kwargs):
@@ -22,6 +23,9 @@ class SDPromptRanker(BaseModelAction):
 class SDImgScorer(BaseModelAction):
     """
     根据多个SD的生成结果，进行美学评分，选出评分最高的图片
+    Class responsible for aesthetically scoring multiple SD generated results and
+    selecting the highest scoring image.
+    
     """
     
     def __init__(self, name: str = "", *args, **kwargs):
@@ -30,8 +34,8 @@ class SDImgScorer(BaseModelAction):
 
 class LoraSelection(BaseModelAction):
     """
-    筛选SD适配当前模型和需求的可用lora，如人物可用亚洲、欧美、日韩多个lora，选择最合适的Lora
-    Selects the most suitable Lora based on the current model and needs.
+    Class responsible for selecting the most suitable Lora based on the
+    current model and requirements.
     """
     
     def __init__(self, name: str = "", *args, **kwargs):
