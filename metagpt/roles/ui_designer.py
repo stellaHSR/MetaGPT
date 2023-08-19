@@ -31,17 +31,18 @@ class Designer(Role):
             name="Catherine",
             profile="UI Design",
             goal="Generate UI icon",
-            constraints="Give clear icon description and generate images to finish the design"):
+            constraints="Give clear icon description and generate images to finish the design",
+            actions=[]):
         super().__init__(name, profile, goal, constraints)
         ### model selection
         ### lora selection
         ### prompt translation
         ### sd generation
         # SDPromptOptimize, SDPromptImprove
-        # if actions:
-        #     self._init_actions(actions)
-        # else:
-        self._init_actions([ModelSelection, SDPromptExtend, SDGeneration])
+        if actions:
+            self._init_actions(actions)
+        else:
+            self._init_actions([ModelSelection, SDPromptExtend, SDGeneration])
     
     @property
     def memory_model_name(self):

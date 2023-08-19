@@ -9,6 +9,7 @@ from metagpt.tools.sd_engine import SDEngine
 from metagpt.actions.design import BaseModelAction
 from metagpt.prompts.sd_design import MODEL_SELECTION_PROMPT
 
+
 class SDPromptRanker(BaseModelAction):
     """
     Class responsible for ranking multiple prompts based on current requirements and
@@ -48,8 +49,8 @@ class ModelSelection(BaseModelAction):
         "pixelmix_v10": "an anime model merge with finetuned lineart and eyes."
     }
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(name="ModelSelection", description="Select models", *args, **kwargs)
+    def __init__(self, name="ModelSelection", *args, **kwargs):
+        super().__init__(name, description="Select models", *args, **kwargs)
     
     def add_models(self, model_name="", model_desc=""):
         updated_info = {model_name: model_desc} if model_name else {}
@@ -91,7 +92,3 @@ class SDGeneration(BaseModelAction):
         
         queries = [query] if isinstance(query, str) else query
         await self._generate_image(queries, model_name, img_name)
-
-
-
-

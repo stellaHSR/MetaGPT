@@ -70,6 +70,7 @@ class SDEngine:
         width=512,
         height=512,
         sd_model="galaxytimemachinesGTM_photoV20",
+        **kwargs
     ):
         # Configure the payload with provided inputs
         self.payload["prompt"] = prompt
@@ -77,6 +78,7 @@ class SDEngine:
         self.payload["width"] = width
         self.payload["height"] = height
         self.payload["override_settings"]["sd_model_checkpoint"] = sd_model
+        self.payload.update(**kwargs)
         logger.info(f"call sd payload is {self.payload}")
         return self.payload
 
