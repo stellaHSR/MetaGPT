@@ -31,15 +31,16 @@ class Designer(Role):
             name="Catherine",
             profile="UI Design",
             goal="Generate UI icon",
-            constraints="Give clear icon description and generate images to finish the design",
-    ):
+            constraints="Give clear icon description and generate images to finish the design"):
         super().__init__(name, profile, goal, constraints)
         ### model selection
         ### lora selection
         ### prompt translation
         ### sd generation
         # SDPromptOptimize, SDPromptImprove
-        
+        # if actions:
+        #     self._init_actions(actions)
+        # else:
         self._init_actions([ModelSelection, SDPromptExtend, SDGeneration])
     
     @property
@@ -138,7 +139,7 @@ class Designer(Role):
         return resp
     
     async def handle_sd_generation(self, *args):
-        msg = self._rc.memory.get_by_action(SDPromptImprove)[0]
+        msg = self._rc.memory.get_by_action(SDPromptExtend)[0]
         image_name = self.get_important_memory(self.memory_user_input)
         resp = json5.loads(msg.content)
         logger.info(resp)
@@ -168,7 +169,10 @@ class Designer(Role):
         handler = handler_map.get(type(todo))
         if handler:
             resp = await handler(query)
-            ret = Message(f"{resp}", role=self.profile, cause_by=type(todo))
+            if type(todo) in [SDPromptImprove, SDPromptOptimize]:
+                ret = Message(f"{resp}", role=self.profile, cause_by=SDPromptExtend)
+            else:
+                ret = Message(f"{resp}", role=self.profile, cause_by=type(todo))
             self._rc.memory.add(ret)
             return ret
         
