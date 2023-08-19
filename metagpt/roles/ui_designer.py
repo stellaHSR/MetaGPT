@@ -9,7 +9,8 @@ from metagpt.logs import logger
 from metagpt.roles import Role
 from metagpt.schema import Message
 
-from metagpt.actions.design import Tool, SDPromptExtend, SDPromptOptimize, SDPromptImprove, ModelSelection, SDGeneration
+from metagpt.actions.design import Tool, SDPromptExtend, SDPromptOptimize, SDPromptImprove
+from metagpt.actions.ui_design import ModelSelection, SDGeneration
 
 
 def retrieve(func):
