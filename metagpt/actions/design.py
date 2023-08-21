@@ -19,6 +19,9 @@ from metagpt.prompts.sd_design import (
     PROMPT_OUTPUT_MAPPING
 )
 
+# A default template for the system primer.
+SYSTEM_PRIMER_TEMPLATE = "Act like you are a terminal and always format your response as json. Always return exactly {answer_count} answers per question in English."
+
 
 class Tool:
     """Define a tool with its name, function and description."""
@@ -29,20 +32,19 @@ class Tool:
         self.func = func
         self.description = description
 
+
 # Decorator for the BaseModelAction to wrap it with system primer details
 def system_primer_decorator(func):
     @wraps(func)
-    async def wrapper(self, *args, **kwargs):
-        system_primer = self.SYSTEM_PRIMER_TEMPLATE.format(answer_count=kwargs.get('answer_count', 1))
+    async def wrapper(*args, **kwargs):
+        system_primer = SYSTEM_PRIMER_TEMPLATE.format(answer_count=kwargs.get('answer_count', 1))
         logger.info(system_primer)
-        return await func(self, *args, system_primer=system_primer, **kwargs)
+        return await func(*args, system_primer=system_primer, **kwargs)
     
     return wrapper
 
 
 class BaseModelAction(Action):
-    # A default template for the system primer.
-    SYSTEM_PRIMER_TEMPLATE = "Act like you are a terminal and always format your response as json. Always return exactly {answer_count} answers per question."
     
     def __init__(self, name: str = "", description: str = "", *args, **kwargs):
         super().__init__(name, *args, **kwargs)
@@ -101,7 +103,8 @@ class SDPromptImprove(BaseModelAction):
 
 class SDPromptExtend(BaseModelAction):
     """Action class to extend the prompt."""
-    def __init__(self, name: str = "", tools: Optional[List[Tool]] = None, **kwargs):
+    
+    def __init__(self, name: str = "", tools: Optional[List[Tool]] = [], **kwargs):
         super().__init__(name, description="Prompt Extend", **kwargs)
         self.tools = tools
         logger.info(self.tools)
@@ -113,7 +116,7 @@ class SDPromptExtend(BaseModelAction):
         tool_names = ", ".join(tool.name for tool in self.tools)
         return tool_names, formatted_tools
     
-    async def run(self, query, answer_count=1, domain: str = "realistic",
+    async def run(self, query: str, answer_count: int = 1, domain: str = "realistic",
                   model_name="realisticVisionV30_v30VAE") -> str:
         """Extend the prompt and get the "Final Action" from the output."""
         tool_names, formatted_tools = self._parse_tools()
@@ -125,3 +128,32 @@ class SDPromptExtend(BaseModelAction):
         output_block = OutputParser.parse_data_with_mapping(resp, PROMPT_OUTPUT_MAPPING)
         return output_block["Final Action"]
 
+
+if __name__ == "__main__":
+    import asyncio
+    from metagpt.actions.ui_design import ModelSelection, SDGeneration
+    
+    query = "Pokémon Go"
+    tools = [
+        Tool(name="PromptOptimize",
+             func=SDPromptOptimize().run,
+             description="Find 3 keywords related to the prompt  that are not found in the prompt. The keywords should be related to each other. Each keyword is a single word. useful for when you need to add extra keywords for input prompt, specially for long enough input"),
+        
+        Tool(name="PromptImprove",
+             func=SDPromptImprove().run,
+             description="Take the prompt and improve it. useful for when you need to add improve and extend the prompt for input prompt, specially for short input"),
+    
+    ]
+    # sd_exd = SDPromptExtend(tools=tools)
+    # resp = asyncio.run(sd_exd.run(query))
+    # logger.info(resp)
+    
+    ms = ModelSelection()
+    model_name, domain = asyncio.run(ms.run(query))
+    logger.info(model_name)
+    sd_po = SDPromptOptimize()
+    sd_pi = SDPromptImprove()
+    resp = asyncio.run(sd_pi.run(query=query, domain=domain, answer_count=1))
+    sd_gen = SDGeneration()
+    resp = asyncio.run(sd_gen.run(query=resp, model_name=model_name))
+    logger.info(resp)

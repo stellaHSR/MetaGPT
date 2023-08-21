@@ -32,18 +32,11 @@ class Designer(Role):
             profile="UI Design",
             goal="Generate UI icon",
             constraints="Give clear icon description and generate images to finish the design",
-            actions=[]):
+            actions=[ModelSelection, SDPromptExtend, SDGeneration]):
         super().__init__(name, profile, goal, constraints)
-        ### model selection
-        ### lora selection
-        ### prompt translation
-        ### sd generation
-        # SDPromptOptimize, SDPromptImprove
-        if actions:
-            self._init_actions(actions)
-        else:
-            self._init_actions([ModelSelection, SDPromptExtend, SDGeneration])
-    
+        
+        self._init_actions(actions)
+
     @property
     def memory_model_name(self):
         return "MODEL_NAME: "
@@ -60,7 +53,7 @@ class Designer(Role):
         self._rc.memory.add(Message(f"{memory_keyword}{memory_content}", role=self.profile))
     
     @retrieve
-    def get_important_memory(self, keyword):
+    def get_important_memory(self, keyword: str):
         query_memory = self._rc.memory.get_by_content(keyword)[0]
         return query_memory.content, keyword
     
@@ -111,7 +104,7 @@ class Designer(Role):
         tools = [
             Tool(name="PromptOptimize",
                  func=SDPromptOptimize().run,
-                 description="Find 3 keywords related to the prompt  that are not found in the prompt. The keywords should be related to each other. Each keyword is a single word. useful for when you need to add extra keywords for input prompt, specially for long enough input"),
+                 description="Find 3 keywords related to the prompt that are not found in the prompt. The keywords should be related to each other. Each keyword is a single word. useful for when you need to add extra keywords for input prompt, specially for long enough input"),
             
             Tool(name="PromptImprove",
                  func=SDPromptImprove().run,
