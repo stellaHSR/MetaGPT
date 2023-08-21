@@ -29,7 +29,7 @@ payload = {
     "steps": 20,
     "cfg_scale": 9,
     "width": 512,
-    "height": 768,#768,
+    "height": 768,#512,
     "restore_faces": False,
     "tiling": False,
     "do_not_save_samples": False,
