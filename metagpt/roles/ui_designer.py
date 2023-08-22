@@ -90,7 +90,7 @@ class Designer(Role):
         else:
             self._rc.todo = None
     
-    async def handle_model_selection(self, query):
+    async def handle_model_selection(self, query, **kwargs):
         ms = ModelSelection()
         model_name, domain = await ms.run(query)
         logger.info(f"{model_name}, {domain}")
@@ -100,7 +100,7 @@ class Designer(Role):
         self.memory_property(self.memory_domain, domain)
         return f"{model_name}||{domain}"
     
-    async def handle_sd_prompt_extend(self, *args):
+    async def handle_sd_prompt_extend(self, *args, **kwargs):
         tools = [
             Tool(name="PromptOptimize",
                  func=SDPromptOptimize().run,
@@ -118,23 +118,25 @@ class Designer(Role):
         resp = await sd_exd.run(query=query, domain=domain, answer_count=1)
         return resp
     
-    async def handle_sd_prompt_improve(self, *args):
+    async def handle_sd_prompt_improve(self, *args, **kwargs):
         query = self.get_important_memory(self.memory_user_input)
         domain = self.get_important_memory(self.memory_domain)
         sd_pi = SDPromptImprove()
         resp = await sd_pi.run(query=query, domain=domain, answer_count=1)
         return resp
     
-    async def handle_sd_prompt_optimize(self, *args):
+    async def handle_sd_prompt_optimize(self, *args, **kwargs):
         query = self.get_important_memory(self.memory_user_input)
         domain = self.get_important_memory(self.memory_domain)
         sd_op = SDPromptOptimize()
         resp = await sd_op.run(query=query, domain=domain, answer_count=1)
         return resp
     
-    async def handle_sd_generation(self, *args):
-        msg = self._rc.memory.get_by_action(SDPromptExtend)[0]
+    async def handle_sd_generation(self, *args, **kwargs):    
+        msg = self._rc.memory.get_by_action(SDPromptImprove)[0]
         image_name = self.get_important_memory(self.memory_user_input)
+        logger.info(type(msg.content))
+        logger.info(msg.content)
         resp = json5.loads(msg.content)
         logger.info(resp)
         model_name = self.get_important_memory(self.memory_model_name)
@@ -164,7 +166,7 @@ class Designer(Role):
         if handler:
             resp = await handler(query)
             if type(todo) in [SDPromptImprove, SDPromptOptimize]:
-                ret = Message(f"{resp}", role=self.profile, cause_by=SDPromptExtend)
+                ret = Message(f"{resp}", role=self.profile, cause_by=SDPromptImprove)
             else:
                 ret = Message(f"{resp}", role=self.profile, cause_by=type(todo))
             self._rc.memory.add(ret)
@@ -185,16 +187,21 @@ class Designer(Role):
 if __name__ == "__main__":
     import asyncio
 
-   
+    s = "['Flappy Bird, Cute kawaii sticker, white background, vector, pastel colors, improved version']"
+    
+    print(json5.loads(s))
+    
     test_queries = ["Flappy Bird",
                     "Clash of Clans",
                     "Subway Surfers",
                     "Pokémon Go",
                     "Super Mario",
                     "Tetris",
-                    "Call of Duty"]
+                    "Call of Duty"
+                    ]
     
     for prompt in test_queries:
         
         designer = Designer()
         asyncio.run(designer.run(prompt))
+    
