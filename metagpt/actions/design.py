@@ -4,7 +4,6 @@
 # @Desc    :
 
 # Standard library imports
-import json
 from functools import wraps
 from typing import Callable, Any, List, Optional, Tuple
 
@@ -18,6 +17,7 @@ from metagpt.prompts.sd_design import (
     FORMAT_INSTRUCTIONS,
     PROMPT_OUTPUT_MAPPING
 )
+from metagpt.utils.resp_parse import flatten_json_structure, try_parse_json
 
 # A default template for the system primer.
 SYSTEM_PRIMER_TEMPLATE = "Act like you are a terminal and always format your response as json. Always return exactly {answer_count} answers per question in English."
@@ -50,16 +50,15 @@ class BaseModelAction(Action):
         super().__init__(name, *args, **kwargs)
         self.desc = description
     
-    async def handle_response(self, resp: str, key: str) -> Any:
-        """Handle JSON response and extract value by a given key."""
+    async def handle_response(self, resp: str) -> Any:
+        """Handle JSON response and extract value."""
         try:
-            resp_json = json.loads(resp)
-            return resp_json[key]
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON response!")
-            return None
-        except KeyError:
-            logger.error(f"Key '{key}' not found in the JSON response!")
+            resp_json = flatten_json_structure(try_parse_json(resp))
+            logger.info(resp_json)
+            return resp_json
+        
+        except Exception:
+            logger.error(f" JSON response {resp_json}!")
             return None
     
     @system_primer_decorator
@@ -68,7 +67,7 @@ class BaseModelAction(Action):
         """Run optimization or improvement based on the given template."""
         prompt = template.format(messages=query, domain=domain, answer_count=answer_count)
         resp: str = await self._aask(prompt=prompt, system_msgs=[system_primer])
-        result = await self.handle_response(resp, key="responses")
+        result = await self.handle_response(resp)
         return result or [query]
 
 
@@ -129,31 +128,3 @@ class SDPromptExtend(BaseModelAction):
         return output_block["Final Action"]
 
 
-if __name__ == "__main__":
-    import asyncio
-    from metagpt.actions.ui_design import ModelSelection, SDGeneration
-    
-    query = "Pokémon Go"
-    tools = [
-        Tool(name="PromptOptimize",
-             func=SDPromptOptimize().run,
-             description="Find 3 keywords related to the prompt  that are not found in the prompt. The keywords should be related to each other. Each keyword is a single word. useful for when you need to add extra keywords for input prompt, specially for long enough input"),
-        
-        Tool(name="PromptImprove",
-             func=SDPromptImprove().run,
-             description="Take the prompt and improve it. useful for when you need to add improve and extend the prompt for input prompt, specially for short input"),
-    
-    ]
-    # sd_exd = SDPromptExtend(tools=tools)
-    # resp = asyncio.run(sd_exd.run(query))
-    # logger.info(resp)
-    
-    ms = ModelSelection()
-    model_name, domain = asyncio.run(ms.run(query))
-    logger.info(model_name)
-    sd_po = SDPromptOptimize()
-    sd_pi = SDPromptImprove()
-    resp = asyncio.run(sd_pi.run(query=query, domain=domain, answer_count=1))
-    sd_gen = SDGeneration()
-    resp = asyncio.run(sd_gen.run(query=resp, model_name=model_name))
-    logger.info(resp)
