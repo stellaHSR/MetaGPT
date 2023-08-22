@@ -186,11 +186,6 @@ class Designer(Role):
 
 if __name__ == "__main__":
     import asyncio
-
-    s = "['Flappy Bird, Cute kawaii sticker, white background, vector, pastel colors, improved version']"
-    
-    print(json5.loads(s))
-    
     test_queries = ["Flappy Bird",
                     "Clash of Clans",
                     "Subway Surfers",
