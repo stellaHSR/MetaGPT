@@ -22,7 +22,7 @@ My scene is: {query}
 """
 
 DOMAIN_JUDGEMENT_TEMPLATE = '''
-use model {model_name}, deside the domain, answer it in the form like Domain: xxx
+use model {model_name}, decide the domain, answer it in the form like Domain: xxx
 
 ###
 Model Information:
@@ -90,13 +90,10 @@ FORMAT_INSTRUCTIONS = """The problem is to make the user input a better text2ima
     $JSON_BLOB
     ```
 
-    Thought: Evaluate a better a prompt by considering the prompt richness, and you can only select one tool
-    ```
-
-    Finish this selection, in the form:
+    Thought:When evaluating a prompt's richness, I need to specify which tool to use and I can only select one tool . To finish this selection, in the form:
     ## Final Action:
-    tool name
-
+    TOOL_NAME
+    
     """
 
 PROMPT_OUTPUT_MAPPING = {
