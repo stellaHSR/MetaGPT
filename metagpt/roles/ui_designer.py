@@ -61,7 +61,7 @@ class Designer(Role):
         """
         这里实现的是二选一的option，action在这里进行了选择
         理论上应该可以实现4种选择 (&：表示串行顺序），目前只选择了前2种
-        1）action1
+        1) action1
         2) action2
         3) action1 & action2
         4) action2 & action1
@@ -186,6 +186,7 @@ class Designer(Role):
 
 if __name__ == "__main__":
     import asyncio
+    import platform
     test_queries = ["Flappy Bird",
                     "Clash of Clans",
                     "Subway Surfers",
@@ -198,5 +199,7 @@ if __name__ == "__main__":
     for prompt in test_queries:
         
         designer = Designer()
+        if platform.system() == "Windows":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         asyncio.run(designer.run(prompt))
     
