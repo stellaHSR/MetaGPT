@@ -54,7 +54,6 @@ class BaseModelAction(Action):
         """Handle JSON response and extract value."""
         try:
             resp_json = flatten_json_structure(try_parse_json(resp))
-            a = resp["resp"]
             logger.info(resp_json)
             return resp_json
         
