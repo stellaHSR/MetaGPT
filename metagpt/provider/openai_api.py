@@ -186,7 +186,7 @@ class OpenAIGPTAPI(BaseGPTAPI, RateLimiter):
                 "stop": None,
                 "temperature": 0.3,
             }
-        kwargs["timeout"] = 3
+        kwargs["timeout"] = 5
         return kwargs
 
     async def _achat_completion(self, messages: list[dict]) -> dict:
